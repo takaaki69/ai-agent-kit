@@ -4,7 +4,9 @@
 #   bash cursor/delegate.sh [--write] [--model NAME] [--timeout SEC] "task"
 #   bash cursor/delegate.sh [--write] --file prompt.md
 #
-# Without --write the agent runs in ask mode (read-only). Auth: CURSOR_API_KEY in
+# Without --write the agent runs in ask mode (read-only). Ask mode still needs
+# --force, or the CLI denies web search (it cannot prompt for approval in -p mode);
+# ask mode itself keeps file edits and shell commands blocked. Auth: CURSOR_API_KEY in
 # the environment (no login step). Install the CLI with install.sh.
 set -uo pipefail
 WRITE=0; MODEL="${CURSOR_DELEGATE_MODEL:-}"; TIMEOUT="${CURSOR_DELEGATE_TIMEOUT:-900}"; PROMPT=""
@@ -14,7 +16,7 @@ while [ $# -gt 0 ]; do
     --model) MODEL="$2"; shift ;;
     --timeout) TIMEOUT="$2"; shift ;;
     --file) PROMPT="$(cat "$2")"; shift ;;
-    -h|--help) sed -n 2,9p "$0"; exit 0 ;;
+    -h|--help) sed -n 2,10p "$0"; exit 0 ;;
     *) PROMPT="${PROMPT:+$PROMPT }$1" ;;
   esac
   shift
@@ -29,7 +31,9 @@ RULES="You are working as a helper for another agent who will review your work.
 Do not run git commit, git push, or delete files. Finish with a short summary:
 what you changed (file paths) and anything you were unsure about."
 ARGS=(-p --trust --output-format text --workspace "$ROOT")
-if [ "$WRITE" = 1 ]; then ARGS+=(--force); else ARGS+=(--mode ask); fi
+# --force auto-approves tool calls (web search included); ask mode keeps it read-only.
+ARGS+=(--force)
+[ "$WRITE" = 1 ] || ARGS+=(--mode ask)
 [ -n "$MODEL" ] && ARGS+=(--model "$MODEL")
 TIMEOUT_CMD=(); command -v timeout >/dev/null 2>&1 && TIMEOUT_CMD=(timeout "$TIMEOUT")
 LOG_DIR="$ROOT/.cursor-runs"; mkdir -p "$LOG_DIR"; LOG="$LOG_DIR/$(date +%Y%m%d-%H%M%S).log"
