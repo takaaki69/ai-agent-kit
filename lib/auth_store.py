@@ -5,10 +5,13 @@
     python lib/auth_store.py codex|agy status
 
 Where the copy lives is chosen by AI_KIT_STORE:
-  dir:<path>   a directory (a synced or mounted folder). Default: dir:~/.ai-agent-kit-store
+  dir:<path>   a directory (a synced or mounted folder).
   drive        Google Drive, through the host project's `scripts.cloud.drive_store`
                (run from the project root; needs its Drive environment variables).
                The file goes to <Drive root>/_private/<tool>-auth.json.
+Unset: drive when the project has scripts/cloud/drive_store.py and a *_DRIVE_REFRESH_TOKEN
+variable (so such projects need no settings), otherwise dir:~/.ai-agent-kit-store, which does
+not survive the session.
 
 The file is a password. Nothing here prints its contents.
 """
@@ -132,9 +135,24 @@ class DriveStore:
             self.drive.upload(folder, name, source, entry.id if entry else None)
 
 
+def _project_has_drive() -> bool:
+    """The host project ships a Drive client (scripts/cloud/drive_store.py) and its credentials are set."""
+    return Path("scripts/cloud/drive_store.py").is_file() and any(
+        k.endswith("_DRIVE_REFRESH_TOKEN") and v for k, v in os.environ.items()
+    )
+
+
+def store_kind() -> str:
+    """Which store is in use: 'drive', 'dir', and whether it was chosen by AI_KIT_STORE or by default."""
+    spec = os.environ.get("AI_KIT_STORE", "")
+    if spec:
+        return ("drive" if spec == "drive" else "dir") + " (AI_KIT_STORE)"
+    return ("drive" if _project_has_drive() else "dir") + " (default)"
+
+
 def open_store():
     spec = os.environ.get("AI_KIT_STORE", "")
-    if spec == "drive":
+    if spec == "drive" or (not spec and _project_has_drive()):
         return DriveStore()
     root = spec[4:] if spec.startswith("dir:") else str(Path.home() / ".ai-agent-kit-store")
     return DirStore(Path(root).expanduser())
@@ -178,9 +196,13 @@ def save(tool: Tool, store) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Keep a helper CLI's login between cloud sessions.")
     parser.add_argument("tool", choices=sorted(TOOLS))
-    parser.add_argument("command", choices=["restore", "save", "status"])
+    parser.add_argument("command", choices=["restore", "save", "status", "store"])
     args = parser.parse_args(argv)
-    tool, store = TOOLS[args.tool], open_store()
+    tool = TOOLS[args.tool]
+    if args.command == "store":
+        print(store_kind())
+        return 0
+    store = open_store()
     if args.command == "restore":
         print(f"{tool.name} auth:", restore(tool, store))
     elif args.command == "save":

@@ -29,6 +29,7 @@ Codex は約8日ごとに auth.json を更新し、古いものは使えなく�
 
 - `AI_KIT_STORE=dir:/path/to/dir` : フォルダに保存（既定は `~/.ai-agent-kit-store`。セッションをまたぐなら同期・マウントされた場所を指定）
 - `AI_KIT_STORE=drive` : Google ドライブ。プロジェクト側に `scripts/cloud/drive_store.py` と Drive 用の環境変数が必要（montage-studio 形式）。`_private/<tool>-auth.json` に置く。
+- 未設定のとき: プロジェクトに `scripts/cloud/drive_store.py` と `*_DRIVE_REFRESH_TOKEN` があれば自動で `drive`（montage-studio は何も設定しなくてよい）。なければ `~/.ai-agent-kit-store`（セッションをまたいで残らない）。どちらが使われるかは `python3 lib/auth_store.py codex store` で分かる。
 
 ## 注意
 
