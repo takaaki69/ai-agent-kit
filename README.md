@@ -19,7 +19,7 @@ Claude を司令塔にして、Codex・Cursor・Antigravity CLI（agy、旧 Gemi
 
 1. プロジェクトにこのリポジトリを追加する（クラウドでは `/home/user/ai-agent-kit` にクローンされる）。
 2. 環境のセットアップスクリプトか最初のコマンドで `bash /home/user/ai-agent-kit/install.sh` を実行する。
-3. Codex / Gemini は初回だけ `login.sh` でログインする。以降は保存された login が自動で復元される。
+3. Codex は `codex/login.sh`、agy は `agy/login_headless.py` で、初回だけログインする。以降は保存されたログインが自動で復元される。
 4. Cursor は環境変数 `CURSOR_API_KEY` を入れる。
 
 ## ログインの保存先（`AI_KIT_STORE`）
@@ -28,8 +28,11 @@ Codex は約8日ごとに auth.json を更新し、古いものは使えなく�
 古いもので新しいものを上書きしない。中身はパスワードと同じ扱いで、出力しない。
 
 - `AI_KIT_STORE=dir:/path/to/dir` : フォルダに保存（既定は `~/.ai-agent-kit-store`。セッションをまたぐなら同期・マウントされた場所を指定）
-- `AI_KIT_STORE=drive` : Google ドライブ。プロジェクト側に `scripts/cloud/drive_store.py` と Drive 用の環境変数が必要（montage-studio 形式）。`_private/<tool>-auth.json` に置く。
-- 未設定のとき: プロジェクトに `scripts/cloud/drive_store.py` と `*_DRIVE_REFRESH_TOKEN` があれば自動で `drive`（montage-studio は何も設定しなくてよい）。なければ `~/.ai-agent-kit-store`（セッションをまたいで残らない）。どちらが使われるかは `python3 lib/auth_store.py codex store` で分かる。
+- `AI_KIT_STORE=drive` : Google ドライブ。キット自身の `lib/drive.py`（標準ライブラリだけ、pip 不要）で、ドライブの `<ルート>/_private/<tool>-auth.json` に置く。
+- 認証情報は環境変数 4 つ（環境の設定画面に入れる。チャットには貼らない）:
+  `AI_KIT_DRIVE_CLIENT_ID` / `AI_KIT_DRIVE_CLIENT_SECRET` / `AI_KIT_DRIVE_REFRESH_TOKEN` / `AI_KIT_DRIVE_ROOT_FOLDER_ID`。
+  すでに `<PREFIX>_DRIVE_*` の名前で持っているプロジェクト（montage-studio の `OPENMONTAGE_DRIVE_*`）は、そのままで動く（保存場所も同じ）。
+- 未設定のとき: Drive の認証情報があれば自動で `drive`。なければ `~/.ai-agent-kit-store`（セッションをまたいで残らない）。どちらが使われるかは `python3 lib/auth_store.py codex store` で分かる。
 
 ## 注意
 

@@ -24,12 +24,15 @@ else
        "Add: bash $KIT/install.sh   (and keep ai-agent-kit in the project's Repositories)"
 fi
 
-STORE="$(cd "$ROOT" && "$PY" "$KIT/lib/auth_store.py" codex store 2>/dev/null)"
+STORE="$(cd "$ROOT" && python3 "$KIT/lib/auth_store.py" codex store 2>/dev/null)"
 case "$STORE" in
   drive*|"dir (AI_KIT_STORE)") ok "login store: $STORE" ;;
   *) todo "Codex/agy logins are lost when the session ends (login store: ${STORE:-unknown})." \
           "Where: cloud environment settings -> Environment variables." \
-          "Add: AI_KIT_STORE=dir:<a synced folder that survives sessions>, or AI_KIT_STORE=drive if the project has scripts/cloud/drive_store.py and its Drive variables." ;;
+          "Add the 4 Drive variables (same values as the OPENMONTAGE_DRIVE_* ones in montage-studio's environment):" \
+          "  AI_KIT_DRIVE_CLIENT_ID, AI_KIT_DRIVE_CLIENT_SECRET, AI_KIT_DRIVE_REFRESH_TOKEN, AI_KIT_DRIVE_ROOT_FOLDER_ID" \
+          "(Never paste the values in chat. A project that already has <PREFIX>_DRIVE_* variables needs nothing.)" \
+          "Without Drive: AI_KIT_STORE=dir:<a synced folder that survives sessions>" ;;
 esac
 
 if want codex; then

@@ -6,11 +6,11 @@
 
 Where the copy lives is chosen by AI_KIT_STORE:
   dir:<path>   a directory (a synced or mounted folder).
-  drive        Google Drive, through the host project's `scripts.cloud.drive_store`
-               (run from the project root; needs its Drive environment variables).
+  drive        Google Drive through lib/drive.py (standard library only). Credentials are
+               AI_KIT_DRIVE_{CLIENT_ID,CLIENT_SECRET,REFRESH_TOKEN,ROOT_FOLDER_ID}; a project's
+               own <PREFIX>_DRIVE_* set (e.g. OPENMONTAGE_DRIVE_*) works as it is.
                The file goes to <Drive root>/_private/<tool>-auth.json.
-Unset: drive when the project has scripts/cloud/drive_store.py and a *_DRIVE_REFRESH_TOKEN
-variable (so such projects need no settings), otherwise dir:~/.ai-agent-kit-store, which does
+Unset: drive when Drive credentials are set, otherwise dir:~/.ai-agent-kit-store, which does
 not survive the session.
 
 The file is a password. Nothing here prints its contents.
@@ -104,42 +104,26 @@ class DirStore:
 
 
 class DriveStore:
-    def __init__(self):
-        sys.path.insert(0, os.getcwd())
-        try:
-            from scripts.cloud import drive_store
-        except ImportError:
-            raise SystemExit("AI_KIT_STORE=drive needs scripts/cloud/drive_store.py in the current project")
-        self.mod = drive_store
-        self.drive = drive_store.GoogleDrive.from_env()
+    """Google Drive through lib/drive.py: <root>/_private/<tool>-auth.json."""
 
-    def _entry(self, name: str):
-        entry = self.mod.resolve(self.drive, f"{REMOTE_DIR}/{name}")
-        return None if entry is None or entry.is_folder else entry
+    def __init__(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from drive import Drive
+
+        self.drive = Drive()
 
     def get(self, name: str) -> bytes | None:
-        entry = self._entry(name)
-        if entry is None:
-            return None
-        with tempfile.TemporaryDirectory() as tmp:
-            target = Path(tmp) / name
-            self.drive.download(entry.id, target)
-            return target.read_bytes()
+        return self.drive.get(REMOTE_DIR, name)
 
     def put(self, name: str, data: bytes) -> None:
-        entry = self._entry(name)
-        folder = self.mod.ensure_folder_path(self.drive, REMOTE_DIR)
-        with tempfile.TemporaryDirectory() as tmp:
-            source = Path(tmp) / name
-            source.write_bytes(data)
-            self.drive.upload(folder, name, source, entry.id if entry else None)
+        self.drive.put(REMOTE_DIR, name, data)
 
 
-def _project_has_drive() -> bool:
-    """The host project ships a Drive client (scripts/cloud/drive_store.py) and its credentials are set."""
-    return Path("scripts/cloud/drive_store.py").is_file() and any(
-        k.endswith("_DRIVE_REFRESH_TOKEN") and v for k, v in os.environ.items()
-    )
+def _drive_credentials() -> bool:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from drive import credential_prefixes
+
+    return bool(credential_prefixes())
 
 
 def store_kind() -> str:
@@ -147,12 +131,12 @@ def store_kind() -> str:
     spec = os.environ.get("AI_KIT_STORE", "")
     if spec:
         return ("drive" if spec == "drive" else "dir") + " (AI_KIT_STORE)"
-    return ("drive" if _project_has_drive() else "dir") + " (default)"
+    return ("drive" if _drive_credentials() else "dir") + " (default)"
 
 
 def open_store():
     spec = os.environ.get("AI_KIT_STORE", "")
-    if spec == "drive" or (not spec and _project_has_drive()):
+    if spec == "drive" or (not spec and _drive_credentials()):
         return DriveStore()
     root = spec[4:] if spec.startswith("dir:") else str(Path.home() / ".ai-agent-kit-store")
     return DirStore(Path(root).expanduser())
