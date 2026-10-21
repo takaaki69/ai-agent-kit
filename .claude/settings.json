@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash /home/user/ai-agent-kit/*)",
+      "Bash(python3 /home/user/ai-agent-kit/*)",
+      "WebSearch",
+      "WebFetch"
+    ]
+  }
+}
