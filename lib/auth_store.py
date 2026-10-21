@@ -1,8 +1,8 @@
-"""Keep a helper CLI's login (Codex ChatGPT plan, Gemini Google account) between cloud sessions.
+"""Keep a helper CLI's login (Codex ChatGPT plan, Antigravity CLI Google account) between cloud sessions.
 
-    python lib/auth_store.py codex|gemini restore   # store -> local login (session start)
-    python lib/auth_store.py codex|gemini save      # local login -> store, when newer
-    python lib/auth_store.py codex|gemini status
+    python lib/auth_store.py codex|agy restore   # store -> local login (session start)
+    python lib/auth_store.py codex|agy save      # local login -> store, when newer
+    python lib/auth_store.py codex|agy status
 
 Where the copy lives is chosen by AI_KIT_STORE:
   dir:<path>   a directory (a synced or mounted folder). Default: dir:~/.ai-agent-kit-store
@@ -19,6 +19,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 import tempfile
 from datetime import datetime, timezone
@@ -56,17 +57,20 @@ class Tool:
             except ValueError:
                 return epoch
             return s if s.tzinfo else s.replace(tzinfo=timezone.utc)
-        if not payload.get("refresh_token"):
+        token = payload.get("token")
+        if not isinstance(token, dict) or not token.get("refresh_token"):
             return None
-        expiry = payload.get("expiry_date")  # ms since epoch; moves forward on each refresh
-        if isinstance(expiry, (int, float)):
-            return datetime.fromtimestamp(expiry / 1000, tz=timezone.utc)
-        return epoch
+        raw = re.sub(r"(\.\d{6})\d+", r"\1", str(token.get("expiry") or ""))  # moves forward on each refresh
+        try:
+            s = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        except ValueError:
+            return epoch
+        return s if s.tzinfo else s.replace(tzinfo=timezone.utc)
 
 
 TOOLS = {
     "codex": Tool("codex", "CODEX_HOME", ".codex", "auth.json"),
-    "gemini": Tool("gemini", "GEMINI_CLI_HOME", ".gemini", "oauth_creds.json"),
+    "agy": Tool("agy", "AGY_AUTH_DIR", ".gemini/antigravity-cli", "antigravity-oauth-token"),
 }
 
 

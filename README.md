@@ -1,19 +1,19 @@
 # ai-agent-kit
 
-Claude を司令塔にして、Codex・Cursor・Gemini CLI に作業を任せるための共通スクリプト集。
+Claude を司令塔にして、Codex・Cursor・Antigravity CLI（agy、旧 Gemini CLI） に作業を任せるための共通スクリプト集。
 どのプロジェクトからも同じ入口で使う。使い方の判断（何を誰に任せるか）はアカウントのスキルに置く。
 
 | 入口 | 役割 | 認証 |
 | --- | --- | --- |
 | `codex/delegate.sh` | Codex CLI（ChatGPT プラン）に1回分の作業を任せる | `codex/login.sh`（デバイス認証、一度だけ） |
 | `cursor/delegate.sh` | Cursor CLI に任せる | 環境変数 `CURSOR_API_KEY` |
-| `gemini/delegate.sh` | Gemini CLI（Google AI Pro）に任せる | `gemini/login.sh`（Google ログイン、一度だけ） |
+| `agy/delegate.sh` | Antigravity CLI（Google AI Pro）に任せる | `agy/login_headless.py`（Google ログイン、一度だけ） |
 | `install.sh [codex cursor gemini]` | CLI のインストール | なし |
-| `lib/auth_store.py` | Codex / Gemini のログインをセッション間で保存・復元 | 下記 |
+| `lib/auth_store.py` | Codex / agy のログインをセッション間で保存・復元 | 下記 |
 
 共通の使い方: `bash <kit>/<tool>/delegate.sh [--write] [--model 名前] [--timeout 秒] "依頼文"`（`--file prompt.md` も可）。
 `--write` なしは読み取り専用。コミットとプッシュは任せない。結果の検証は Claude が行う。
-実行ログは対象プロジェクトの `.codex-runs/` `.cursor-runs/` `.gemini-runs/` に残る（gitignore 推奨）。
+実行ログは対象プロジェクトの `.codex-runs/` `.cursor-runs/` `.agy-runs/` に残る（gitignore 推奨）。
 
 ## プロジェクトから使う
 
@@ -32,6 +32,8 @@ Codex は約8日ごとに auth.json を更新し、古いものは使えなく�
 
 ## 注意
 
-- Gemini は環境に `GEMINI_API_KEY` / `GOOGLE_API_KEY` があると API キーが優先され、AI Pro の枠を使わない。ログイン済みのときは delegate.sh が実行中だけそれらを外す。
+- Gemini CLI は 2026-06-18 に個人の Google アカウント（AI Pro 含む）での提供が終わり、agy に置き換わった。Gemini CLI のログインは `IneligibleTierError` になる。
+- agy の `--print` は、プロンプトを `--print="..."` の形で付ける（`--print "..."` だと次のフラグをプロンプトと誤解する）。delegate.sh は対応済み。
+- agy のログインはクラウドで端末操作ができないため、`python3 agy/login_headless.py start` で URL を出し、ユーザーが取ったコードを `python3 agy/login_headless.py code <コード>` で渡す。2つのコマンドの間で agy を再起動しない（コードはその agy にだけ有効、約25分）。
 - 同じログインを複数の場所で使うと、更新で片方が切れる。クラウド用は別にログインする。
 - 「Codex plan limit reached」の警告は誤検知のことがある。回答が正常に返っていれば続行する。
