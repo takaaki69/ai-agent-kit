@@ -8,7 +8,7 @@ Claude を司令塔にして、Codex・Cursor・Antigravity CLI（agy、旧 Gemi
 | 入口 | 役割 | 認証 |
 | --- | --- | --- |
 | `codex/delegate.sh` | Codex CLI（ChatGPT プラン）に1回分の作業を任せる | `codex/login.sh`（デバイス認証、一度だけ） |
-| `cursor/delegate.sh` | Cursor CLI に任せる | 環境変数 `CURSOR_API_KEY` |
+| `cursor/delegate.sh` | Cursor CLI に任せる（クラウドで CLI が無ければその場で入れる） | 環境変数 `CURSOR_API_KEY`（Mac は `agent login` でも可） |
 | `agy/delegate.sh` | Antigravity CLI（Google AI Pro）に任せる | `agy/login_headless.py`（Google ログイン、一度だけ） |
 | `install.sh [codex cursor gemini]` | CLI のインストール | なし |
 | `lib/auth_store.py` | Codex / agy のログインをセッション間で保存・復元 | 下記 |
