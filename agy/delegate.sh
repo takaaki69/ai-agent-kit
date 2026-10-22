@@ -38,7 +38,10 @@ fi
 
 RULES="You are working as a helper for another agent who will review your work.
 Do not run git commit, git push, or delete files. Finish with a short summary:
-what you changed (file paths) and anything you were unsure about."
+what you changed (file paths) and anything you were unsure about.
+When you report facts from the web: give the source URL and a short verbatim quote
+for each; if you cannot verify a quote or a date, write \"no source\" or \"unverified\"
+instead of guessing. Never invent quotes."
 [ "$WRITE" = 0 ] && RULES="$RULES
 This is a read-only task: do not create or edit files; answer in text."
 ARGS=()
