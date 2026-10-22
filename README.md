@@ -17,6 +17,13 @@ Claude を司令塔にして、Codex・Cursor・Antigravity CLI（agy、旧 Gemi
 `--write` なしは読み取り専用。コミットとプッシュは任せない。結果の検証は Claude が行う。
 実行ログは対象プロジェクトの `.codex-runs/` `.cursor-runs/` `.agy-runs/` に残る（gitignore 推奨）。
 
+## 利用記録
+
+どの `delegate.sh` も、実行のたびに1行（日時・プロジェクト名・助手・終了状態・所要秒・読み取り/書き込み・モデル・依頼文と回答の文字数）を記録する。依頼文と回答の中身は保存しない。
+Drive の認証情報があれば Drive の `<root>/_usage/usage.jsonl` に、なければ `~/.ai-agent-kit-usage.jsonl` に追記するので、キットを使うすべてのプロジェクトの分が同じファイルに集まる。
+集計: `python3 lib/usage_log.py summary [日数]`。止めるには `AI_KIT_USAGE_LOG=0`。記録に失敗しても実行結果は変わらない。
+記録されるのは「何をどこに任せたか」で、Claude の使用量そのものや節約量は測れない。
+
 ## プロジェクトから使う
 
 1. プロジェクトにこのリポジトリを追加する（クラウドでは `/home/user/ai-agent-kit` にクローンされる）。

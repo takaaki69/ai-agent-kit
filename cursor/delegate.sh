@@ -55,12 +55,16 @@ elif command -v gtimeout >/dev/null 2>&1; then TIMEOUT_CMD=(gtimeout "$TIMEOUT")
 fi
 LOG_DIR="$ROOT/.cursor-runs"; mkdir -p "$LOG_DIR"; LOG="$LOG_DIR/$(date +%Y%m%d-%H%M%S).log"
 { echo "# $(date -Iseconds) write=$WRITE model=${MODEL:-default} timeout=${TIMEOUT}s"; echo "# task: $PROMPT"; echo; } > "$LOG"
+START=$(date +%s)
 
 ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} "$CLI" "${ARGS[@]}" "$RULES
 
 Task:
 $PROMPT" 2>&1 | tee -a "$LOG"
 STATUS=${PIPESTATUS[0]}
+# Count this run for the usage summary (best effort; see lib/usage_log.py).
+OUT_CHARS=$(wc -c < "$LOG" 2>/dev/null || echo 0)
+AI_KIT_PROJECT="$ROOT" python3 "$KIT/lib/usage_log.py" add cursor "$STATUS" "$(( $(date +%s) - START ))" "$WRITE" "${MODEL:-}" "${#PROMPT}" "${OUT_CHARS//[[:space:]]/}" >&2 || true
 echo
 echo "==> cursor exit=$STATUS log=$LOG"
 [ "$STATUS" = 124 ] && echo "==> timed out after ${TIMEOUT}s"

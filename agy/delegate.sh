@@ -49,6 +49,7 @@ if [ "$WRITE" = 1 ]; then ARGS+=(--mode accept-edits); else ARGS+=(--mode plan);
 [ -n "$MODEL" ] && ARGS+=(--model "$MODEL")
 TIMEOUT_CMD=(); command -v timeout >/dev/null 2>&1 && TIMEOUT_CMD=(timeout "$TIMEOUT")
 LOG_DIR="$ROOT/.agy-runs"; mkdir -p "$LOG_DIR"; LOG="$LOG_DIR/$(date +%Y%m%d-%H%M%S).log"
+START=$(date +%s)
 
 # The prompt must be attached to --print (--print=...), or agy takes the next flag as the prompt.
 (cd "$ROOT" && ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} agy "${ARGS[@]}" --print="$RULES
@@ -56,6 +57,9 @@ LOG_DIR="$ROOT/.agy-runs"; mkdir -p "$LOG_DIR"; LOG="$LOG_DIR/$(date +%Y%m%d-%H%
 Task:
 $PROMPT") 2>&1 | tee "$LOG"
 STATUS=${PIPESTATUS[0]}
+# Count this run for the usage summary (best effort; see lib/usage_log.py).
+OUT_CHARS=$(wc -c < "$LOG" 2>/dev/null || echo 0)
+AI_KIT_PROJECT="$ROOT" python3 "$KIT/lib/usage_log.py" add agy "$STATUS" "$(( $(date +%s) - START ))" "$WRITE" "${MODEL:-}" "${#PROMPT}" "${OUT_CHARS//[[:space:]]/}" >&2 || true
 echo
 echo "==> agy exit=$STATUS log=$LOG"
 [ "$STATUS" = 124 ] && echo "==> timed out after ${TIMEOUT}s"
