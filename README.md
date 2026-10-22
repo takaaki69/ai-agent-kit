@@ -24,6 +24,15 @@ Claude を司令塔にして、Codex・Cursor・Antigravity CLI（agy、旧 Gemi
 3. Codex は `codex/login.sh`、agy は `agy/login_headless.py` で、初回だけログインする。以降は保存されたログインが自動で復元される。
 4. Cursor は環境変数 `CURSOR_API_KEY` を入れる。
 
+### 毎回のセッションで自動セットアップする
+
+プロジェクトの `.claude/settings.json` に次を足すと、セッション開始時に `install.sh`（入っていれば何もしない）と `doctor.sh` が走り、未設定の項目だけ `TODO` として表示される。このリポジトリ自身の `.claude/settings.json` にも同じ設定を入れてある。
+
+```json
+"hooks": {"SessionStart": [{"hooks": [{"type": "command",
+  "command": "bash /home/user/ai-agent-kit/install.sh >/dev/null 2>&1; bash /home/user/ai-agent-kit/doctor.sh 2>&1 | grep -A3 TODO || true"}]}]}
+```
+
 ## ログインの保存先（`AI_KIT_STORE`）
 
 Codex は約8日ごとに auth.json を更新し、古いものは使えなくなる。そのため保存先に置き、更新のたびに新しい方を書き戻す。
