@@ -77,11 +77,15 @@ if [ "$WRITE" = 1 ]; then ARGS+=(-s workspace-write); else ARGS+=(-s read-only);
   echo "# task: $PROMPT"
   echo
 } > "$LOG"
+START=$(date +%s)
 
 # The prompt goes through stdin so long tasks need no quoting.
 printf '%s\n\nTask:\n%s\n' "$RULES" "$PROMPT" \
   | ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} codex "${ARGS[@]}" - >>"$LOG" 2>&1
 STATUS=$?
+# Count this run for the usage summary (best effort; see lib/usage_log.py).
+OUT_CHARS=$(wc -c < "${ANSWER:-$LOG}" 2>/dev/null || echo 0)
+AI_KIT_PROJECT="$ROOT" python3 "$KIT/lib/usage_log.py" add codex "$STATUS" "$(( $(date +%s) - START ))" "$WRITE" "${MODEL:-}" "${#PROMPT}" "${OUT_CHARS//[[:space:]]/}" >&2 || true
 
 if [ -s "$ANSWER" ]; then cat "$ANSWER"; else tail -n 40 "$LOG"; fi
 echo
