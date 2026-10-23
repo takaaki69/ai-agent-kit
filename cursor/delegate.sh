@@ -1,5 +1,5 @@
 #!/bin/bash
-# Hand one task to the Cursor CLI (`agent -p`, Takaaki's Cursor plan).
+# Hand one task to the Cursor CLI (`agent -p`, the user's Cursor plan).
 #
 #   bash cursor/delegate.sh [--write] [--model NAME] [--timeout SEC] "task"
 #   bash cursor/delegate.sh [--write] --file prompt.md

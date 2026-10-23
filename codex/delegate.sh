@@ -1,5 +1,5 @@
 #!/bin/bash
-# Hand one task to the Codex CLI (`codex exec`, Takaaki's ChatGPT plan) and save its output.
+# Hand one task to the Codex CLI (`codex exec`, the user's ChatGPT plan) and save its output.
 #
 #   bash scripts/codex/delegate.sh [--write] [--model NAME] [--effort low|medium|high] [--timeout SEC] "task"
 #   bash scripts/codex/delegate.sh [--write] --file prompt.md
