@@ -32,10 +32,11 @@
 
 claude.ai/code の環境メニュー（歯車アイコン）から、使う環境（例: Default）を開きます。
 
-1. **Setup script** に、キットを入れるコマンドを書く（`SETUP.md` の例）。`SETUP.md` の例のとおり、clone 済みなら再 clone しない形にする。
+1. **Setup script** に、キットを入れるコマンドを書く（`SETUP.md` の例。`<owner>` は自分の GitHub アカウント）。`SETUP.md` の例のとおり、clone 済みなら再 clone しない形にする。
 2. **環境変数 / ネットワークシークレット**に、必要な値を登録する（値はここにだけ入れる）:
    - Cursor を使う: `CURSOR_API_KEY`
-   - Drive にログインを保存する: `AI_KIT_DRIVE_CLIENT_ID` / `AI_KIT_DRIVE_CLIENT_SECRET` / `AI_KIT_DRIVE_REFRESH_TOKEN` / `AI_KIT_DRIVE_ROOT_FOLDER_ID`
+   - Drive にログインを保存する（取得のしかたは `SETUP.md`）: `AI_KIT_DRIVE_CLIENT_ID` / `AI_KIT_DRIVE_CLIENT_SECRET` / `AI_KIT_DRIVE_REFRESH_TOKEN` / `AI_KIT_DRIVE_ROOT_FOLDER_ID`
+   - ログインの保存先をフォルダにする: `AI_KIT_STORE=dir:<セッションをまたいで残る場所>`（Drive を使うなら不要）
    - 台帳（任意）: `AI_KIT_LEDGER_SHEET_ID`、`AI_KIT_LEDGER_SA`（`LEDGER-PATTERN.md`）
 3. **ネットワーク**: 既定の「Trusted」は許可リストだけを通す。助手の通信が `host_not_allowed` や 403 で止まったら、そのドメインを「許可するドメイン」に足す（どのドメインが要るかは、エラーに出たホスト名で判断する）。
 
@@ -50,7 +51,7 @@ bash /home/user/ai-agent-kit/doctor.sh
 ```
 
 `OK` は準備できている項目。`TODO` は足りない設定で、書かれている場所と手順に従う。環境変数の値は表示されない。
-`TODO` が無くなるまで、3〜4 を繰り返す。
+`TODO` が無くなるまで、3〜4 を繰り返す（手順 1〜2 の確認が通らないときは、下の「つまずいたとき」を見る）。ログイン保存の `TODO` は任意（`SETUP.md`）。
 
 ## 5. ★ 助手にログインする（初回だけ）
 
