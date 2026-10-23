@@ -27,6 +27,7 @@ Claude を司令塔にして、Codex・Cursor・Antigravity CLI（agy、旧 Gemi
 
 共通の使い方: `bash <kit>/<tool>/delegate.sh [--write] [--model 名前] [--timeout 秒] "依頼文"`（`--file prompt.md` も可）。
 `--write` なしは読み取り専用。コミットとプッシュは任せない。結果の検証は Claude が行う。
+助手を起動するとき、その助手に要らない秘密（Drive の認証情報、トークンなど）は環境から外す（`lib/scrub_env.sh`、`AI_KIT_SCRUB_ENV=0` で無効）。
 実行ログは対象プロジェクトの `.codex-runs/` `.cursor-runs/` `.agy-runs/` に残る（gitignore 推奨）。
 
 ## 利用記録

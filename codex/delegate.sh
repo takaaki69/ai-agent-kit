@@ -78,10 +78,11 @@ if [ "$WRITE" = 1 ]; then ARGS+=(-s workspace-write); else ARGS+=(-s read-only);
   echo
 } > "$LOG"
 START=$(date +%s)
+. "$KIT/lib/scrub_env.sh"; scrub_env_prefix codex   # keep secrets the helper does not need out of its environment
 
 # The prompt goes through stdin so long tasks need no quoting.
 printf '%s\n\nTask:\n%s\n' "$RULES" "$PROMPT" \
-  | ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} codex "${ARGS[@]}" - >>"$LOG" 2>&1
+  | ${SCRUB[@]+"${SCRUB[@]}"} ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} codex "${ARGS[@]}" - >>"$LOG" 2>&1
 STATUS=$?
 # Count this run for the usage summary (best effort; see lib/usage_log.py).
 OUT_CHARS=$(wc -c < "${ANSWER:-$LOG}" 2>/dev/null || echo 0)
