@@ -14,12 +14,12 @@ AI エージェント向けの注意: このファイルは「何を誰が用意
 | --- | --- | --- | --- |
 | クラウド環境のセットアップスクリプト | セッション開始時にキットを入れる | クラウド環境の設定 → Setup script | 人間 |
 | `CURSOR_API_KEY` | Cursor CLI の認証 | Cursor のダッシュボードで API キーを作り、環境変数に登録 | 人間（値はチャットに貼らない） |
-| `AI_KIT_DRIVE_CLIENT_ID` / `_CLIENT_SECRET` / `_REFRESH_TOKEN` / `_ROOT_FOLDER_ID` | Codex・agy のログインをセッション間で保存する（任意） | Google Cloud で OAuth クライアントを作り、リフレッシュトークンと保存先フォルダの ID を得て、環境変数に登録（既に `<PREFIX>_DRIVE_*` の名前で持っているなら、そのままで動く） | 人間 |
+| `AI_KIT_DRIVE_CLIENT_ID` / `_CLIENT_SECRET` / `_REFRESH_TOKEN` / `_ROOT_FOLDER_ID` | Codex・agy のログインをセッション間で保存する（任意） | Google Cloud で OAuth クライアント（種類は「デスクトップアプリ」、Drive API を有効化、スコープ `https://www.googleapis.com/auth/drive`）を作り、そのクライアントでログインして得たリフレッシュトークンと、保存先フォルダの ID（ブラウザで開いたときの URL の `folders/` の後ろ）を環境変数に登録（既に `<PREFIX>_DRIVE_*` の名前で持っているなら、そのままで動く） | 人間 |
 | Codex のログイン | Codex CLI の認証 | `bash /home/user/ai-agent-kit/codex/login.sh` をバックグラウンドで実行し、出たコードを人間が `https://auth.openai.com/codex/device` で承認（初回だけ） | エージェントが実行、人間が承認 |
 | agy のログイン | agy の認証 | `python3 /home/user/ai-agent-kit/agy/login_headless.py start` が出す URL を人間が開き、得たコードを `python3 /home/user/ai-agent-kit/agy/login_headless.py code <コード>` で渡す（約25分以内、間に agy を再起動しない） | エージェントが実行、人間が承認 |
 
 Drive の変数が無ければ、ログインは `~/.ai-agent-kit-store` に保存され、セッションが終わると消えます。毎回ログインし直したくなければ Drive の変数、または `AI_KIT_STORE=dir:<セッションをまたいで残るフォルダ>` を設定します。
-ログイン保存の `TODO` は任意です。使わないなら、それ以外がすべて `OK` であれば使えます。
+ログイン保存の `TODO` は任意です。他の `TODO` は、その助手を使うなら必須です（使わない助手は `doctor.sh codex` のように絞って確認します）。使わないなら、それ以外がすべて `OK` であれば使えます。
 
 ## 環境変数の扱い（安全面）
 
@@ -37,6 +37,8 @@ KIT=/home/user/ai-agent-kit
 [ -d "$KIT/.git" ] || git clone https://github.com/<owner>/ai-agent-kit "$KIT"
 bash "$KIT/install.sh"
 ```
+
+`<owner>` は、キットを置いている自分の GitHub アカウント（他人のものを使うなら自分の fork）。引数なしの `install.sh` は Codex・Cursor・agy を全部入れる（使う助手だけなら `install.sh codex` のように絞る。失敗しても警告だけで終了コードは 0）。
 
 最新の状態を保つには、プロジェクトの `.claude/settings.json` の SessionStart フックで毎回更新します。
 

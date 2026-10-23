@@ -39,14 +39,16 @@ Drive の認証情報があれば Drive の `<root>/_usage/usage.jsonl` に、�
 
 ## プロジェクトから使う
 
+はじめてなら先に [docs/FIRST-TIME-GUIDE.md](docs/FIRST-TIME-GUIDE.md) の手順 1〜3（GitHub 連携、リポジトリ登録、環境設定）を済ませる。
+
 1. 環境のセットアップスクリプトで `/home/user/ai-agent-kit` に clone し、`bash /home/user/ai-agent-kit/install.sh` を実行する（例は [docs/SETUP.md](docs/SETUP.md)）。キットだけを使う定期タスクなら、リポジトリとして追加してもよい。ただし、プロジェクトのリポジトリとしてキットを足すと複数リポジトリのセッションになり、下の SessionStart フックは読み込まれない。
-2. 以降の手順は、この環境のセットアップが済んでいる前提。
+2. 以降の手順は、1 のセットアップが済んでいる前提。
 3. Codex は `codex/login.sh`、agy は `agy/login_headless.py` で、初回だけログインする。以降は保存されたログインが自動で復元される。
 4. Cursor は環境変数 `CURSOR_API_KEY` を入れる。
 
 ### 毎回のセッションで自動セットアップする
 
-プロジェクトの `.claude/settings.json` に次を足すと、セッション開始時に `install.sh`（入っていれば何もしない）と `doctor.sh` が走り、未設定の項目だけ `TODO` として表示される。このリポジトリ自身の `.claude/settings.json` にも同じ設定を入れてある。
+プロジェクトの `.claude/settings.json` に次を足すと（キットを毎回最新にする版は [docs/SETUP.md](docs/SETUP.md)）、セッション開始時に `install.sh`（入っていれば何もしない）と `doctor.sh` が走り、未設定の項目だけ `TODO` として表示される。このリポジトリ自身の `.claude/settings.json` にも同じ設定を入れてある。
 
 ```json
 "hooks": {"SessionStart": [{"hooks": [{"type": "command",
