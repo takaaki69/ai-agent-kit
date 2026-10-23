@@ -1,5 +1,5 @@
 #!/bin/bash
-# Hand one task to the Cursor CLI (`agent -p`, Takaaki's Cursor plan).
+# Hand one task to the Cursor CLI (`agent -p`, the user's Cursor plan).
 #
 #   bash cursor/delegate.sh [--write] [--model NAME] [--timeout SEC] "task"
 #   bash cursor/delegate.sh [--write] --file prompt.md
@@ -56,8 +56,9 @@ fi
 LOG_DIR="$ROOT/.cursor-runs"; mkdir -p "$LOG_DIR"; LOG="$LOG_DIR/$(date +%Y%m%d-%H%M%S).log"
 { echo "# $(date -Iseconds) write=$WRITE model=${MODEL:-default} timeout=${TIMEOUT}s"; echo "# task: $PROMPT"; echo; } > "$LOG"
 START=$(date +%s)
+. "$KIT/lib/scrub_env.sh"; scrub_env_prefix cursor   # keep secrets the helper does not need out of its environment
 
-${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} "$CLI" "${ARGS[@]}" "$RULES
+${SCRUB[@]+"${SCRUB[@]}"} ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} "$CLI" "${ARGS[@]}" "$RULES
 
 Task:
 $PROMPT" 2>&1 | tee -a "$LOG"

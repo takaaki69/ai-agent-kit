@@ -50,9 +50,10 @@ if [ "$WRITE" = 1 ]; then ARGS+=(--mode accept-edits); else ARGS+=(--mode plan);
 TIMEOUT_CMD=(); command -v timeout >/dev/null 2>&1 && TIMEOUT_CMD=(timeout "$TIMEOUT")
 LOG_DIR="$ROOT/.agy-runs"; mkdir -p "$LOG_DIR"; LOG="$LOG_DIR/$(date +%Y%m%d-%H%M%S).log"
 START=$(date +%s)
+. "$KIT/lib/scrub_env.sh"; scrub_env_prefix agy   # keep secrets the helper does not need out of its environment
 
 # The prompt must be attached to --print (--print=...), or agy takes the next flag as the prompt.
-(cd "$ROOT" && ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} agy "${ARGS[@]}" --print="$RULES
+(cd "$ROOT" && ${SCRUB[@]+"${SCRUB[@]}"} ${TIMEOUT_CMD[@]+"${TIMEOUT_CMD[@]}"} agy "${ARGS[@]}" --print="$RULES
 
 Task:
 $PROMPT") 2>&1 | tee "$LOG"

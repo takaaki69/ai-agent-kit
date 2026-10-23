@@ -42,7 +42,7 @@ if want codex; then
     if codex login status >/dev/null 2>&1; then ok "Codex logged in"
     else todo "Codex is not logged in (first time only)." \
               "Claude runs: bash $KIT/codex/login.sh  (in the background)" \
-              "Takaaki: open https://auth.openai.com/codex/device and enter the code Claude shows."
+              "The user: open https://auth.openai.com/codex/device and enter the code Claude shows."
     fi
   fi
 fi
@@ -66,11 +66,11 @@ if want agy; then
     if [ -s "$TOKEN" ]; then ok "agy logged in"
     else todo "agy is not logged in (first time only; needs the Google AI Pro account)." \
               "Claude runs: python3 $KIT/agy/login_headless.py start   (prints a URL)" \
-              "Takaaki: open the URL, sign in, paste back the code." \
+              "The user: open the URL, sign in, paste back the code." \
               "Claude runs: python3 $KIT/agy/login_headless.py code <code>"
     fi
   fi
 fi
 
-[ "$BAD" = 0 ] && echo "All set." || echo "Not ready: tell Takaaki the TODO items above, with the places and steps."
+[ "$BAD" = 0 ] && echo "All set." || echo "Not ready: tell the user the TODO items above, with the places and steps."
 exit "$BAD"

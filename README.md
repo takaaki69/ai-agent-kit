@@ -2,6 +2,18 @@
 
 > 個人用のツールです。無保証で提供しており、使う場合は自己責任でお願いします。ライセンスは付けていないため、他の人への利用許可は出していません。
 
+## このリポジトリでできること
+
+AI に仕事を任せて、自分の時間と利用枠を守るための道具箱です。大きく2つあります。
+
+1. **助手への委任**: Claude を司令塔にして、Codex・Cursor・Antigravity CLI（agy）に、調査・修正・下書きなどを任せます。使う枠を Claude・Codex・Cursor・agy に分散し、能力が要る部分にだけ Claude の枠を使うのが目的です。小さな作業は任せず、Claude 自身が行います。
+2. **スケジュール・タスク管理の型**: 予定とタスクを台帳（スプレッドシート）とカレンダーに集め、AI が書記と見張り番になります。決まった時刻に短いまとめだけを届け、期日が近づくほど段階的に通知を強めるので、**通知が埋もれません**。全体像と使い方は [docs/TASK-SYSTEM.md](docs/TASK-SYSTEM.md)、台帳のつなぎ方は [docs/LEDGER-PATTERN.md](docs/LEDGER-PATTERN.md) にあります。
+
+はじめて使う人は [docs/FIRST-TIME-GUIDE.md](docs/FIRST-TIME-GUIDE.md)（クラウド環境に取り込む手順を順に案内）から、用意するものの一覧は [docs/SETUP.md](docs/SETUP.md) で確認できます。AI エージェントは [AGENTS.md](AGENTS.md) から読み始めます。
+このリポジトリは公開です。自分の台帳の ID、メール、実データ、他人の名前は置かず、環境変数や自分の文書に持ちます。
+
+## 助手への委任（スクリプト一覧）
+
 Claude を司令塔にして、Codex・Cursor・Antigravity CLI（agy、旧 Gemini CLI） に作業を任せるための共通スクリプト集。
 どのプロジェクトからも同じ入口で使う。使い方の判断（何を誰に任せるか）はアカウントのスキルに置く。
 
@@ -10,11 +22,12 @@ Claude を司令塔にして、Codex・Cursor・Antigravity CLI（agy、旧 Gemi
 | `codex/delegate.sh` | Codex CLI（ChatGPT プラン）に1回分の作業を任せる | `codex/login.sh`（デバイス認証、一度だけ） |
 | `cursor/delegate.sh` | Cursor CLI に任せる（クラウドで CLI が無ければその場で入れる） | 環境変数 `CURSOR_API_KEY`（Mac は `agent login` でも可） |
 | `agy/delegate.sh` | Antigravity CLI（Google AI Pro）に任せる | `agy/login_headless.py`（Google ログイン、一度だけ） |
-| `install.sh [codex cursor gemini]` | CLI のインストール | なし |
+| `install.sh [codex cursor agy]` | CLI のインストール | なし |
 | `lib/auth_store.py` | Codex / agy のログインをセッション間で保存・復元 | 下記 |
 
 共通の使い方: `bash <kit>/<tool>/delegate.sh [--write] [--model 名前] [--timeout 秒] "依頼文"`（`--file prompt.md` も可）。
 `--write` なしは読み取り専用。コミットとプッシュは任せない。結果の検証は Claude が行う。
+助手を起動するとき、その助手に要らない秘密（Drive の認証情報、トークンなど）は環境から外す（`lib/scrub_env.sh`、`AI_KIT_SCRUB_ENV=0` で無効）。
 実行ログは対象プロジェクトの `.codex-runs/` `.cursor-runs/` `.agy-runs/` に残る（gitignore 推奨）。
 
 ## 利用記録
@@ -26,8 +39,8 @@ Drive の認証情報があれば Drive の `<root>/_usage/usage.jsonl` に、�
 
 ## プロジェクトから使う
 
-1. プロジェクトにこのリポジトリを追加する（クラウドでは `/home/user/ai-agent-kit` にクローンされる）。
-2. 環境のセットアップスクリプトか最初のコマンドで `bash /home/user/ai-agent-kit/install.sh` を実行する。
+1. 環境のセットアップスクリプトで `/home/user/ai-agent-kit` に clone し、`bash /home/user/ai-agent-kit/install.sh` を実行する（例は [docs/SETUP.md](docs/SETUP.md)）。キットだけを使う定期タスクなら、リポジトリとして追加してもよい。ただし、プロジェクトのリポジトリとしてキットを足すと複数リポジトリのセッションになり、下の SessionStart フックは読み込まれない。
+2. 以降の手順は、この環境のセットアップが済んでいる前提。
 3. Codex は `codex/login.sh`、agy は `agy/login_headless.py` で、初回だけログインする。以降は保存されたログインが自動で復元される。
 4. Cursor は環境変数 `CURSOR_API_KEY` を入れる。
 
